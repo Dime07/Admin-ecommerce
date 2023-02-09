@@ -8,6 +8,26 @@ import DataTable from 'react-data-table-component';
 
 export default function Products() {  
   useEffect(() => {
+    const getDataProduct =async () => {
+      await axios
+        .get('https://dummyjson.com/products?limit=50')
+        .then((res) => {
+          switch(res.status) {
+            case 200:
+              const data = res.data
+              setProducts(data.products)
+              getFilterData(data.products)
+              break;
+            default:
+              break;
+          }
+        })
+        .catch((err) => {
+          alert(err.response.status)
+        })
+      
+    }
+
     getDataProduct()  
   }, [])
   
@@ -24,25 +44,6 @@ export default function Products() {
   })
   const [selectedCategory, setSelectedCategory] = useState('')
   
-  const getDataProduct =async () => {
-    await axios
-      .get('https://dummyjson.com/products?limit=50')
-      .then((res) => {
-        switch(res.status) {
-          case 200:
-            const data = res.data
-            setProducts(data.products)
-            getFilterData(data.products)
-            break;
-          default:
-            break;
-        }
-      })
-      .catch((err) => {
-        alert(err.response.status)
-      })
-    
-  }
 
   const columns = [
     {
@@ -172,8 +173,8 @@ export default function Products() {
                 <div className='flex gap-2'>
                   <select name="brand" id="brand-dropdown" className='w-full py-1 px-2 rounded-md focus:outline-none border-[0.5px] border-gray-400' onChange={(e) => filterDataByBrand(e)}>
                     <option value='' hidden>Brand</option>
-                    {filterBrand.map((item:string) => (
-                      <option value={item}>{item}</option>
+                    {filterBrand.map((item:string, index: number) => (
+                      <option value={item} key={index}>{item}</option>
                     ))}
                   </select>
                   <select name="price_range" id="price-dropdown" className='w-full py-1 px-2 rounded-md focus:outline-none border-[0.5px] border-gray-400' onChange={(e) => filterDataByPrice(e)}>
@@ -183,8 +184,8 @@ export default function Products() {
                   </select>
                   <select name="category" id="category-dropdown" className='w-full py-1 px-2 rounded-md focus:outline-none border-[0.5px] border-gray-400' onChange={(e) => filterDataByCategory(e)}>
                     <option value='' hidden>Category</option>
-                    {filterCategory.map((item:string) => (
-                      <option value={item}>{item}</option>
+                    {filterCategory.map((item:string, index: number) => (
+                      <option value={item} key={index}>{item}</option>
                     ))}
                   </select>
                 </div>

@@ -6,16 +6,17 @@ import Image from 'next/image'
 import { Star1 } from 'iconsax-react'
 
 export default function DetailProducts() {
+    
     const router = useRouter()
+    const { id } = router.query
     const [product, setProduct] =  useState<any>()
-    var width = window.innerWidth
 
     useEffect(() => {
-        const { id } = router.query
+        
         const idProduct:number = parseInt(id as string)
         getDetailProduct(idProduct)
     }, [])
-
+    
     const getDetailProduct = (id: number) => {
         axios
             .get(`https://dummyjson.com/products/${id}`)
@@ -62,7 +63,9 @@ export default function DetailProducts() {
                                 </p>
                             </div>
                         </div>
-                        <Image src={product?.thumbnail} alt={`${product?.title} Photo`} width={width / 3} height={600} layout="responsive" loading="lazy" />
+                        <div className='w-full'>
+                            <Image src={product?.thumbnail} alt={`${product?.title} Photo`} width={600} height={600} layout="responsive" loading="lazy" />
+                        </div>
                     </div>
                     <div className='flex w-1/2 flex-col'>
                         <p className='text-sm font-medium'>
