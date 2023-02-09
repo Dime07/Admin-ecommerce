@@ -144,14 +144,14 @@ export default function Products() {
   }
 
   const resetFilter = () => {
-    // const brandDropdown:HTMLElement = document.getElementById('brand-dropdown')
-    // const priceDropdown = document.getElementById('price-dropdown')
-    // const categoryDropdown = document.getElementById('category-dropdown')
+    const brandDropdown:any = document.getElementById('brand-dropdown')
+    const priceDropdown:any = document.getElementById('price-dropdown')
+    const categoryDropdown:any = document.getElementById('category-dropdown')
 
     setFilteredProducts([])
-    // brandDropdown?.selectedIndex = 0
-    // priceDropdown?.selectedIndex = 0
-    // categoryDropdown?.selectedIndex = 0
+    brandDropdown.selectedIndex = 0
+    priceDropdown.selectedIndex = 0
+    categoryDropdown.selectedIndex = 0
   }
   
   return (
