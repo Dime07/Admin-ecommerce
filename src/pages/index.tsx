@@ -20,6 +20,44 @@ import { Bar } from 'react-chartjs-2';
 export default function Dashboard() {
 
   useEffect(() => {
+    const getDataProduct =async () => {
+      await axios
+        .get('https://dummyjson.com/products?limit=50')
+        .then((res) => {
+          switch(res.status) {
+            case 200:
+              const data = res.data
+              setProducts(data.products)
+              calculateTotalItemBrand(data.products)
+              break;
+            default:
+              break;
+          }
+        })
+        .catch((err) => {
+          alert(err.response.status)
+        })
+    }
+
+    const getDataCart =async () => {
+      await axios
+      .get('https://dummyjson.com/carts')
+      .then((res) => {
+        console.log(res.data)
+        switch(res.status) {
+          case 200:
+            const data = res.data
+            setCarts(data.carts)
+            break;
+          default:
+            break;
+        }
+      })
+      .catch((err) => {
+        alert(err.response.status)
+      })
+    }
+  
     getDataProduct()
     getDataCart()
   }, [])
@@ -29,44 +67,8 @@ export default function Dashboard() {
   const [brands, setBrands] = useState<String[]>([])
   const [totalItem, setTotalItem] = useState<Number[]>([])
 
-  const getDataProduct =async () => {
-    await axios
-      .get('https://dummyjson.com/products?limit=50')
-      .then((res) => {
-        switch(res.status) {
-          case 200:
-            const data = res.data
-            setProducts(data.products)
-            calculateTotalItemBrand(data.products)
-            break;
-          default:
-            break;
-        }
-      })
-      .catch((err) => {
-        alert(err.response.status)
-      })
-    
-  }
-
-  const getDataCart =async () => {
-    await axios
-    .get('https://dummyjson.com/carts')
-    .then((res) => {
-      console.log(res.data)
-      switch(res.status) {
-        case 200:
-          const data = res.data
-          setCarts(data.carts)
-          break;
-        default:
-          break;
-      }
-    })
-    .catch((err) => {
-      alert(err.response.status)
-    })
-  }
+ 
+  
 
   const calculateTotalItemBrand = (data : any) => {
     let brands:String[] = []
