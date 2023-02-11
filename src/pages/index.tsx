@@ -52,7 +52,6 @@ export default function Dashboard() {
         await axios
         .get('https://dummyjson.com/carts')
         .then((res) => {
-          console.log(res.data)
           switch(res.status) {
             case 200:
               const data = res.data

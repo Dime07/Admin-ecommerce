@@ -89,7 +89,6 @@ export default function Products() {
     axios
       .get(`https://dummyjson.com/products/search?q=${e.target.value}&limit=100`)
       .then((res) => {
-        console.log(res.data)
         switch(res.status) {
           case 200:
             const data = res.data

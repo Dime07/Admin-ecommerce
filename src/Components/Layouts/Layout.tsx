@@ -21,7 +21,7 @@ export default function Layout(props: LayoutInterface) {
                 <title>{props.title}</title>
                 <meta name="description" content="Admin to manage E commerce" />
                 <meta name="viewport" content="width=device-width, initial-scale=1" />
-                <link rel="icon" href="/favicon.ico" />
+                <link rel="icon" href="/logo.png" />
             </Head>
             <main className="flex lg:flex-row flex-col relative">
                 <Navbar />

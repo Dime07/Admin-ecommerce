@@ -38,11 +38,9 @@ export default function DetailProducts() {
             axios
                 .get(`https://dummyjson.com/products/${id}`)
                 .then((res) => {
-                    console.log(res)
                     switch (res.status) {
                         case 200:
                             const data = res.data
-                            console.log(data)
                             setProduct(data)
                             resolve()
                             break;
