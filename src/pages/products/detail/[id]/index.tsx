@@ -12,13 +12,25 @@ export default function DetailProducts() {
     const { id } = router.query
     const [product, setProduct] =  useState<any>()
     const [isLoading, setIsLoading] = useState(false)
+    const [currentIndex, setCurrentIndex] = useState(0)
 
     useEffect(() => {
         const idProduct:number = parseInt(id as string)
         setIsLoading(true)
-        Promise.all([
-            getDetailProduct(idProduct)
-        ]).then(() => setIsLoading(false))
+
+        if(id as string === undefined){
+            const idLocal = localStorage.getItem('cartId')
+            const idProduct:number = parseInt(idLocal as string)
+            Promise.all([
+                getDetailProduct(idProduct)
+            ]).then(() => setIsLoading(false))
+        }else{
+            localStorage.setItem('cartId', id as string)
+            const idProduct:number = parseInt(id as string)
+            Promise.all([
+                getDetailProduct(idProduct)
+            ]).then(() => setIsLoading(false))
+        }
     }, [])
     
     const getDetailProduct = (id: number) => {
@@ -55,7 +67,7 @@ export default function DetailProducts() {
 
     return (
         <Layout title='Admin | Detail Product'>
-            <div className='p-8'>
+            <div className='lg:p-8 p-3'>
              <div className='lg:py-5 lg:px-4 p-2 rounded-md bg-white'>
                 {isLoading ? 
                     (
@@ -63,16 +75,27 @@ export default function DetailProducts() {
                     ) :
                     (
                         <div className='flex lg:flex-row flex-col gap-10 lg:items-center items-start'>
-                            <div className='relative lg:w-1/2 w-full rounded-md overflow-hidden'>
-                                <div>
-                                    <div className='absolute left-0 top-0 bg-secondary p-3 rounded-br-lg'>
-                                        <p className='text-white font-bold text-lg'>
-                                            $ {product?.price}
-                                        </p>
+                            <div className='lg:w-1/2 w-full'>
+                                <div className='relative w-full rounded-md overflow-hidden'>
+                                    <div>
+                                        <div className='absolute left-0 top-0 bg-secondary p-3 rounded-br-lg'>
+                                            <p className='text-white font-bold text-lg'>
+                                                $ {product?.price}
+                                            </p>
+                                        </div>
                                     </div>
+                                    {product !== undefined && (
+                                        <div className='w-full h-[400px] border-[0.5px]'>
+                                            <Image src={product.images[currentIndex]} className='transition-all ease-in-out' alt={`${product?.title} Photo`} width={500} height={500} style={{ objectFit: 'cover', width: '100%', height: '100%' }} priority/>
+                                        </div>
+                                    )}
                                 </div>
-                                <div className='w-full'>
-                                    <Image src={product?.thumbnail} alt={`${product?.title} Photo`} width={600} height={600} layout="responsive" loading="lazy" />
+                                <div className='w-full flex flex-row justify-between gap-2 h-[100px] mt-2'>
+                                    {product?.images.map((item:any, index:number) => (
+                                        <div className={`w-1/4 h-full rounded-md overflow-hidden border-[0.5px] hover:brightness-50 ${currentIndex === index ? 'border-primary border-[3px]' : ''} transition-all duration-500 ease-in-out`} key={index} onClick={() => setCurrentIndex(index)}>
+                                            <Image src={item} alt={`${product?.title} Photo`} width={500} height={500} style={{ objectFit: 'cover', width: '100%', height: '100%' }} loading="lazy"/>
+                                        </div>
+                                    ))}
                                 </div>
                             </div>
                             <div className='flex lg:w-1/2 w-full flex-col'>

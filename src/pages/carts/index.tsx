@@ -92,7 +92,7 @@ export default function Carts() {
 
   return (
     <Layout title='Admin | Carts'>
-        <div className='p-8'>
+        <div className='lg:p-8 p-3'>
           <h2 className='text-gray-600 font-semibold text-xl mb-7'>
             Carts
           </h2>

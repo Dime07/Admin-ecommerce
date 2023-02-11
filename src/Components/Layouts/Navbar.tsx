@@ -16,9 +16,9 @@ export default function Navbar() {
           <HambergerMenu size={32} color='#61CA77'/>
         </div>
 
-        <div className={`lg:h-screen ${isOpen ? 'h-fit' : 'h-0'} overflow-hidden transition-all ease-in-out duration-[1000ms]`}>
+        <div className={`lg:h-screen ${isOpen ? 'h-fit' : 'h-0'} overflow-hidden transition-all ease-in-out duration-[500ms]`}>
           <div className='lg:py-7 py-0 lg:mb-0 mb-3 flex justify-center'>
-            <Image src={logo} alt="Logo brand" width={50} height={50}/>
+            <Image src={logo} alt="Logo brand" width={50} height={50} style={{width: "auto", height: "auto"}}/>
           </div>
           <ul className='inline'>
               <Link href='/'>

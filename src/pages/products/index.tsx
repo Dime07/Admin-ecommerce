@@ -32,8 +32,11 @@ export default function Products() {
       })
       
     }
+
     setIsLoading(true)
+
     Promise.all([
+      getDataLocal(),
       getDataProduct()  
     ]).then(() => setIsLoading(false))
   }, [])
@@ -51,7 +54,7 @@ export default function Products() {
     max: 0
   })
   const [selectedCategory, setSelectedCategory] = useState('')
-  
+
 
   const columns = [
     {
@@ -82,7 +85,7 @@ export default function Products() {
   ];
 
   const searchProduct = (e : any) => {
-    console.log(`https://dummyjson.com/products?q=${e.target.value}`)
+    resetFilter()
     axios
       .get(`https://dummyjson.com/products/search?q=${e.target.value}&limit=100`)
       .then((res) => {
@@ -124,20 +127,28 @@ export default function Products() {
 
   const filterDataByBrand = (e:any) => {
     setSelectedBrand(e.target.value)
+    localStorage.setItem('selected_brand', e.target.value)
     filterData(e.target.value, selectedCategory, selectedPrice.min, selectedPrice.max)
   }
 
   const filterDataByCategory = (e:any) => {
     setSelectedCategory(e.target.value)
+    localStorage.setItem('selected_category', e.target.value)
     filterData(selectedBrand, e.target.value, selectedPrice.min, selectedPrice.max)
   }
 
   const filterDataByPrice = (e:any) => {
     if(parseFloat(e.target.value) === filterPriceRange[0]){
-      setSelectedPrice({...selectedPrice, min: 0, max: parseFloat(e.target.value)})
+      const data = {...selectedPrice, min: 0, max: parseFloat(e.target.value)}
+      setSelectedPrice(data)
+      localStorage.setItem('selected_price', JSON.stringify(data) )
+
       filterData(selectedBrand, e.target.value, 0, e.target.value)
     }else{
-      setSelectedPrice({...selectedPrice, min: filterPriceRange[0], max: parseFloat(e.target.value)})
+      const data = {...selectedPrice, min: filterPriceRange[0], max: parseFloat(e.target.value)}
+      setSelectedPrice(data)
+      localStorage.setItem('selected_price', JSON.stringify(data) )
+
       filterData(selectedBrand, e.target.value, filterPriceRange[0], e.target.value)
     }
   }
@@ -151,6 +162,7 @@ export default function Products() {
       }
     })
 
+    localStorage.setItem('filtered_data', JSON.stringify(results))
     setFilteredProducts(results)
   }
 
@@ -159,15 +171,41 @@ export default function Products() {
     const priceDropdown:any = document.getElementById('price-dropdown')
     const categoryDropdown:any = document.getElementById('category-dropdown')
 
+    localStorage.removeItem('selected_category')
+    localStorage.removeItem('selected_brand')
+    localStorage.removeItem('selected_price')
+    localStorage.removeItem('filtered_data')
+
+    setSelectedBrand('')
+    setSelectedCategory('')
+    setSelectedPrice({min: 0, max: 0})
     setFilteredProducts([])
+
     brandDropdown.selectedIndex = 0
     priceDropdown.selectedIndex = 0
     categoryDropdown.selectedIndex = 0
   }
   
+  const getDataLocal = () => {
+    return new Promise<void>((resolve) => {
+      const brandLocal = localStorage.getItem('selected_brand')
+      const categoryLocal = localStorage.getItem('selected_category') 
+      const priceLocalS = localStorage.getItem('selected_price') 
+      const priceLocal = JSON.parse(priceLocalS as string)
+      const filterDataS = localStorage.getItem('filtered_data')
+      const filterData = JSON.parse(filterDataS as string)
+
+      brandLocal !== null ? setSelectedBrand(brandLocal) : setSelectedBrand('') 
+      categoryLocal !== null ? setSelectedCategory(categoryLocal) : setSelectedCategory('') 
+      priceLocalS !== null ? setSelectedPrice({min: priceLocal.min, max: priceLocal.max}) : setSelectedPrice({min: 0, max: 0})
+      filterDataS !== null ? setFilteredProducts(filterData) : setFilteredProducts([])
+      resolve()
+    })
+  }
+
   return (
     <Layout title='Admin | Products'>
-        <div className='p-8'>
+        <div className='lg:p-8 p-3'>
           <div className='py-5 px-4 rounded-md bg-white'>
             <p className='text-gray-600 font-semibold text-xl'>
               Product
@@ -188,19 +226,19 @@ export default function Products() {
                       </div>
                       <div className='flex gap-2'>
                         <select name="category" id="category-dropdown" className='w-full py-1 px-2 rounded-md focus:outline-none border-[0.5px] border-gray-400' onChange={(e) => filterDataByCategory(e)}>
-                          <option value='' hidden>Category</option>
+                          <option value='' hidden>{selectedCategory !== '' ? selectedCategory : 'Category'}</option>
                           {filterCategory.map((item:string, index: number) => (
                             <option value={item} key={index}>{item}</option>
                           ))}
                         </select>
                         <select name="brand" id="brand-dropdown" className='w-full py-1 px-2 rounded-md focus:outline-none border-[0.5px] border-gray-400' onChange={(e) => filterDataByBrand(e)}>
-                          <option value='' hidden>Brand</option>
+                          <option value='' hidden>{selectedBrand !== '' ? selectedBrand : 'Brand'}</option>
                           {filterBrand.map((item:string, index: number) => (
                             <option value={item} key={index}>{item}</option>
                           ))}
                         </select>
                         <select name="price_range" id="price-dropdown" className='w-full py-1 px-2 rounded-md focus:outline-none border-[0.5px] border-gray-400' onChange={(e) => filterDataByPrice(e)}>
-                          <option value='' hidden>Price Range</option>
+                            <option value='' hidden>{selectedPrice.max !== 0 ? `$${selectedPrice.min} to $${selectedPrice.max}` : 'Price'}</option>
                             <option value={filterPriceRange[0]}>$0 to ${filterPriceRange[0]}</option>
                             <option value={filterPriceRange[1]}>${filterPriceRange[0]} to ${filterPriceRange[1]}</option>
                         </select>

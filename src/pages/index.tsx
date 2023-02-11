@@ -95,7 +95,6 @@ export default function Dashboard() {
         let total = 0
         for(let j = 0; j <= brands.length - 1; j++){
           allBrands[i] == brands[j] ? total += 1 : total = total
-          console.log( allBrands[i], brands[j])
         }
         totalItem.push(total)
       }
@@ -130,7 +129,7 @@ export default function Dashboard() {
 
   return (
     <Layout title='Admin | Ecommerce' >
-      <div className='p-8'>
+      <div className='lg:p-8 p-3'>
         <h2 className='text-gray-600 font-semibold text-xl mb-7'>
           Dashboards
         </h2>
