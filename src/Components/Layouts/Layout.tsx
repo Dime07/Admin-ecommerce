@@ -23,9 +23,9 @@ export default function Layout(props: LayoutInterface) {
                 <meta name="viewport" content="width=device-width, initial-scale=1" />
                 <link rel="icon" href="/favicon.ico" />
             </Head>
-            <main className="flex flex-row relative">
+            <main className="flex lg:flex-row flex-col relative">
                 <Navbar />
-                <div className="pl-56 bg-primaryLight w-full h-screen">
+                <div className="lg:pl-56 pl-0 w-full lg:mt-0 mt-24">
                     {props.children}
                 </div>
             </main>

@@ -5,30 +5,37 @@ import axios from 'axios'
 import Link from 'next/link'
 
 import DataTable from 'react-data-table-component';
+import Loading from '@/Components/Loading/loading'
 
 export default function Products() {  
   useEffect(() => {
-    const getDataProduct =async () => {
-      await axios
-        .get('https://dummyjson.com/products?limit=50')
-        .then((res) => {
-          switch(res.status) {
-            case 200:
-              const data = res.data
-              setProducts(data.products)
-              getFilterData(data.products)
-              break;
-            default:
-              break;
-          }
-        })
-        .catch((err) => {
-          alert(err.response.status)
-        })
+    const getDataProduct =() => {
+      return new Promise<void>(async(resolve) => {
+        await axios
+          .get('https://dummyjson.com/products?limit=50')
+          .then((res) => {
+            switch(res.status) {
+              case 200:
+                const data = res.data
+                setProducts(data.products)
+                Promise.all([
+                  getFilterData(data.products)
+                ]).then(() => resolve())
+                break;
+              default:
+                break;
+            }
+          })
+          .catch((err) => {
+            alert(err.response.status)
+          })
+      })
       
     }
-
-    getDataProduct()  
+    setIsLoading(true)
+    Promise.all([
+      getDataProduct()  
+    ]).then(() => setIsLoading(false))
   }, [])
   
   const [products, setProducts] = useState<any>([])
@@ -36,6 +43,7 @@ export default function Products() {
   const [filterBrand, setFilterBrand] = useState<any>([])
   const [filterPriceRange, setFilterPriceRange] = useState<any>([])
   const [filterCategory, setFilterCategory] = useState<any>([])
+  const [isLoading, setIsLoading] = useState(false)
 
   const [selectedBrand, setSelectedBrand] = useState('')
   const [selectedPrice, setSelectedPrice] = useState({
@@ -94,21 +102,24 @@ export default function Products() {
   }
 
   const getFilterData = (data: any) => {
-    const brands = data.map((item:any) => item.brand) 
-    let allBrands = Array.from(new Set(brands))
-    setFilterBrand(allBrands)
-
-    const price = data.map((item:any) => item.price)
-    let allPrice:number[] = Array.from(new Set(price))
-    let priceRange= [
-      Math.max(...allPrice) / 2,
-      Math.max(...allPrice)
-    ]
-    setFilterPriceRange(priceRange)
-
-    const category = data.map((item:any) => item.category) 
-    let allCategory = Array.from(new Set(category))
-    setFilterCategory(allCategory)
+    return new Promise<void>(resolve=>{
+      const brands = data.map((item:any) => item.brand) 
+      let allBrands = Array.from(new Set(brands))
+      setFilterBrand(allBrands)
+  
+      const price = data.map((item:any) => item.price)
+      let allPrice:number[] = Array.from(new Set(price))
+      let priceRange= [
+        Math.max(...allPrice) / 2,
+        Math.max(...allPrice)
+      ]
+      setFilterPriceRange(priceRange)
+  
+      const category = data.map((item:any) => item.category) 
+      let allCategory = Array.from(new Set(category))
+      setFilterCategory(allCategory)
+      resolve()
+    })
   }
 
   const filterDataByBrand = (e:any) => {
@@ -130,7 +141,6 @@ export default function Products() {
       filterData(selectedBrand, e.target.value, filterPriceRange[0], e.target.value)
     }
   }
-
 
   const filterData = (brand: string, category:string, min:number, max:number) => {
     const results:any[] = products.filter((item : any) => {
@@ -162,46 +172,56 @@ export default function Products() {
             <p className='text-gray-600 font-semibold text-xl'>
               Product
             </p>
-            <div className='flex justify-between items-end mt-3'>
-              <div>
-                <div className='flex justify-between mb-2 items-center'>
-                  <p className='text-sm text-gray-400'>
-                    Filter by :
-                  </p>
-                  <button onClick={resetFilter} className='text-sm p-1 bg-primary text-white rounded-sm'>Clear Filter</button>
-                </div>
-                <div className='flex gap-2'>
-                  <select name="brand" id="brand-dropdown" className='w-full py-1 px-2 rounded-md focus:outline-none border-[0.5px] border-gray-400' onChange={(e) => filterDataByBrand(e)}>
-                    <option value='' hidden>Brand</option>
-                    {filterBrand.map((item:string, index: number) => (
-                      <option value={item} key={index}>{item}</option>
-                    ))}
-                  </select>
-                  <select name="price_range" id="price-dropdown" className='w-full py-1 px-2 rounded-md focus:outline-none border-[0.5px] border-gray-400' onChange={(e) => filterDataByPrice(e)}>
-                    <option value='' hidden>Price Range</option>
-                      <option value={filterPriceRange[0]}>$0 to ${filterPriceRange[0]}</option>
-                      <option value={filterPriceRange[1]}>${filterPriceRange[0]} to ${filterPriceRange[1]}</option>
-                  </select>
-                  <select name="category" id="category-dropdown" className='w-full py-1 px-2 rounded-md focus:outline-none border-[0.5px] border-gray-400' onChange={(e) => filterDataByCategory(e)}>
-                    <option value='' hidden>Category</option>
-                    {filterCategory.map((item:string, index: number) => (
-                      <option value={item} key={index}>{item}</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-              <div className='border-gray-200 flex border-solid border-[0.5px] w-1/3 rounded-md py-2 px-3 mt-2'>
-                <SearchNormal1 size={24} color={'#727272'} />
-                <input type="text" name="search" id="search" placeholder='Search Product...' className='ml-2 focus:outline-none' onChange={(e) => searchProduct(e)}/>
-              </div>
-            </div>
-            <div className='mt-5'>
-              <DataTable
-                  columns={columns}
-                  data={filteredProducts.length > 0 ? filteredProducts : products}
-                  pagination
-              />
-            </div>
+            {isLoading ?
+              (
+                <Loading />
+              ) :
+              (
+                <>
+                  <div className='flex lg:flex-row flex-col lg:justify-between justify-start lg:items-end items-start mt-3'>
+                    <div className='lg:order-1 order-2'>
+                      <div className='flex justify-between mb-2 items-center'>
+                        <p className='text-sm text-gray-400'>
+                          Filter by :
+                        </p>
+                        <button onClick={resetFilter} className='text-sm p-1 bg-primary text-white rounded-sm'>Clear Filter</button>
+                      </div>
+                      <div className='flex gap-2'>
+                        <select name="category" id="category-dropdown" className='w-full py-1 px-2 rounded-md focus:outline-none border-[0.5px] border-gray-400' onChange={(e) => filterDataByCategory(e)}>
+                          <option value='' hidden>Category</option>
+                          {filterCategory.map((item:string, index: number) => (
+                            <option value={item} key={index}>{item}</option>
+                          ))}
+                        </select>
+                        <select name="brand" id="brand-dropdown" className='w-full py-1 px-2 rounded-md focus:outline-none border-[0.5px] border-gray-400' onChange={(e) => filterDataByBrand(e)}>
+                          <option value='' hidden>Brand</option>
+                          {filterBrand.map((item:string, index: number) => (
+                            <option value={item} key={index}>{item}</option>
+                          ))}
+                        </select>
+                        <select name="price_range" id="price-dropdown" className='w-full py-1 px-2 rounded-md focus:outline-none border-[0.5px] border-gray-400' onChange={(e) => filterDataByPrice(e)}>
+                          <option value='' hidden>Price Range</option>
+                            <option value={filterPriceRange[0]}>$0 to ${filterPriceRange[0]}</option>
+                            <option value={filterPriceRange[1]}>${filterPriceRange[0]} to ${filterPriceRange[1]}</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div className='lg:order-2 order-1border-gray-200 flex border-solid border-[0.5px] lg:w-1/3 w-full rounded-md py-2 px-3 mt-2 lg:mb-0 mb-4'>
+                      <SearchNormal1 size={24} color={'#727272'} />
+                      <input type="text" name="search" id="search" placeholder='Search Product...' className='ml-2 focus:outline-none' onChange={(e) => searchProduct(e)}/>
+                    </div>
+                  </div>
+                  <div className='mt-5'>
+                    <DataTable
+                        columns={columns}
+                        data={filteredProducts.length > 0 ? filteredProducts : products}
+                        pagination
+                    />
+                  </div>
+                
+                </>
+              )
+            }
           </div>
         </div>
     </Layout>
